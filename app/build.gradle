@@ -1,0 +1,78 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id "androidx.navigation.safeargs.kotlin"
+}
+
+
+android {
+    namespace 'com.nutmeg.mygrocerybudget'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.nutmeg.mygrocerybudget"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.7'
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
+}
+
+dependencies {
+
+    implementation platform('androidx.compose:compose-bom:2023.10.01') // Ensures consistent versions for all Compose libraries
+    androidTestImplementation platform('androidx.compose:compose-bom:2023.10.01') // Ensures consistent versions for all Compose libraries
+
+    implementation 'androidx.core:core-ktx' // Kotlin extensions for Android core library, providing idiomatic Kotlin functions
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx' // Kotlin extensions for Lifecycle, providing lifecycle-aware components
+    implementation 'androidx.activity:activity-compose' // Integration of Jetpack Compose with Android activities
+    implementation 'androidx.compose.ui:ui' // Core UI components of Jetpack Compose
+    implementation 'androidx.compose.ui:ui-graphics' // Compose support for drawing graphics
+    implementation 'androidx.compose.ui:ui-tooling-preview' // Preview tools for Compose layouts
+    implementation 'androidx.compose.material3:material3' // Material Design 3 components for Compose
+    implementation 'androidx.compose.material:material' // Material Design components for Compose
+    implementation 'androidx.compose.runtime:runtime' // Core runtime for Jetpack Compose
+    implementation 'androidx.appcompat:appcompat:1.6.1' // Backwards-compatible support library for Android components
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // Support for constraint-based layout in Android views
+    implementation 'androidx.navigation:navigation-fragment-ktx' // Kotlin extensions for Android Navigation, for managing navigation in fragments
+    implementation 'androidx.navigation:navigation-ui-ktx' // Kotlin extensions for Android Navigation UI components
+    testImplementation 'junit:junit:4.13.2' // JUnit library for unit testing
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5' // AndroidX JUnit extensions for Android testing
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1' // Espresso library for UI testing in Android
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4' // JUnit4 test integration for Jetpack Compose
+    debugImplementation 'androidx.compose.ui:ui-tooling' // Tools for debugging Jetpack Compose layouts
+    debugImplementation 'androidx.compose.ui:ui-test-manifest' // Manages UI test manifests in debug builds for Jetpack Compose
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose' // Integration of Jetpack Compose with Android ViewModel
+    implementation "androidx.navigation:navigation-compose:2.7.6" // Navigation components for Jetpack Compose
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose" // Integration of Jetpack Compose with Android ViewModel (duplicate entry, but same purpose)
+    implementation "org.jetbrains.kotlin:kotlin-stdlib" // Kotlin standard library
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4' // Support for Java 8+ APIs on older Android versions
+}

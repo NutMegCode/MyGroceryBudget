@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainScreenFragment">
+
+    <fragment
+        android:id="@+id/mainScreenFragment"
+        android:name="com.nutmeg.mygrocerybudget.presentation.mainScreen.mainScreenFragment"
+        android:label="mainScreenFragment" />
+
+    <action
+        android:id="@+id/app_exit_action"
+        app:destination="@+id/app_exit_dest" />
+    <fragment
+        android:id="@+id/app_exit_dest"
+        android:name="androidx.fragment.app.Fragment" />
+
+</navigation>
