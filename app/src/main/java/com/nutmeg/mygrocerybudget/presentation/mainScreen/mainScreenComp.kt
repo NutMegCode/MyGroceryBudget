@@ -1,5 +1,6 @@
 package com.nutmeg.mygrocerybudget.presentation.mainScreen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,14 +35,44 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nutmeg.mygrocerybudget.utils.NutMegTextField
+import com.nutmeg.mygrocerybudget.utils.TextfieldData
+import java.text.NumberFormat
+import java.util.Locale
+
+data class Item(
+    var name: String = "",
+    var qty: Int = 1,
+    var price: Double = 0.0,
+    var itemTotal: Double = 0.0
+
+)
 
 @Composable
 fun mainScreen() {
 
-    var itemList by remember { mutableStateOf(emptyList<Int>()) }
+    var itemList by remember { mutableStateOf(emptyList<Item>()) }
+
+    var showPopUp by remember { mutableStateOf(false) }
+
+    val budgetTextfieldData = remember { TextfieldData() }
+
+    val nameTextfieldData = remember { TextfieldData() }
+    val quantityTextfieldData = remember { TextfieldData() }
+    val priceTextfieldData = remember { TextfieldData() }
+
+
+    val total = itemList.sumOf { it.itemTotal }
+
+    val remaining = budgetTextfieldData.dpFormattedText.toDouble() - total
+
+    Log.d("RandomString", "remaining is $remaining")
 
         Scaffold(
             topBar = {
@@ -66,92 +97,218 @@ fun mainScreen() {
                         .padding(paddingValues)) {
 
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.2f))
-                    ) {
-                        Row(
-                            Modifier
+                    if (showPopUp) {
+                        Card(
+                            modifier = Modifier
                                 .fillMaxWidth()
                                 .wrapContentHeight()
-                                .padding(vertical = 10.dp)) {
-                            Column(Modifier.weight(5f), horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(text = "Budget")
-                                TextField(value = "$0.00", onValueChange = {})
-                            }
-                            Column(Modifier.weight(5f), horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(text = "Remaining")
-                                Text(text = "$0.00")
-                            }
-
-                        }
-
-                    }
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.2f))
-                    ) {
-                        Row(
-                            Modifier
-                                .height(50.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically) {
+                                .padding(20.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.2f))
+                        ) {
                             Column(
                                 Modifier
-                                    .fillMaxHeight()
-                                    .width(50.dp)
-                                    ) {
-
-                            }
-                            Column(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .weight(2f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .padding(10.dp)
                             ) {
-                                Text(text = "Name")
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Column(Modifier.width(60.dp)) {
+                                        Text(text = "Name")
+                                    }
+                                    NutMegTextField().StringField(
+                                        data = nameTextfieldData,
+                                        imeAction = ImeAction.Next
+                                    )
+                                }
+                                Row(Modifier.padding(top = 10.dp),verticalAlignment = Alignment.CenterVertically) {
+                                    Column(Modifier.width(60.dp)) {
+                                        Text(text = "Quantity")
+                                    }
+                                    NutMegTextField().IntField(
+                                        data = quantityTextfieldData,
+                                        imeAction = ImeAction.Next
+                                    )
+                                }
+                                Row(Modifier.padding(top = 10.dp),verticalAlignment = Alignment.CenterVertically) {
+                                    Column(Modifier.width(60.dp)) {
+                                        Text(text = "Price")
+                                    }
+                                    NutMegTextField().CurrencyField(
+                                        data = priceTextfieldData,
+                                        imeAction = ImeAction.Done
+                                    )
+                                }
+
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 10.dp)) {
+                                    Column(Modifier.weight(5f),horizontalAlignment = Alignment.CenterHorizontally) {
+                                        NutMegStyledButton(
+                                            title = "Discard",
+                                            color = Color.Red,
+                                            full = false
+                                        ) {
+                                            nameTextfieldData.text = ""
+                                            quantityTextfieldData.text = ""
+                                            priceTextfieldData.text = ""
+                                            showPopUp = false
+                                        }
+                                    }
+
+                                    Column(Modifier.weight(5f),horizontalAlignment = Alignment.CenterHorizontally) {
+                                        NutMegStyledButton(
+                                            title = "Save",
+                                            full = false
+                                        ) {
+                                            val newItem = Item(
+                                                name = nameTextfieldData.text,
+                                                qty = quantityTextfieldData.text.toInt(),
+                                                price = priceTextfieldData.dpFormattedText.toDouble(),
+                                                itemTotal = priceTextfieldData.dpFormattedText.toDouble() * quantityTextfieldData.text.toDouble()
+                                            )
+
+                                            itemList =
+                                                itemList.toMutableList().apply { add(newItem) }
+
+                                            nameTextfieldData.text = ""
+                                            quantityTextfieldData.text = ""
+                                            priceTextfieldData.text = ""
+
+                                            showPopUp = false
+                                        }
+                                    }
+
+
+                                }
+
+
                             }
-                            Column(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .weight(2f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center) {
-                                Text(text = "Qty")
+
+                        }
+                    } else {
+
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(20.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.2f))
+                        ) {
+                            Column(Modifier.padding(12.dp)) {
+                                Row(Modifier.padding(bottom = 12.dp)) {
+                                    Column(
+                                        Modifier.weight(5f),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(text = "Budget", style = TextStyle(fontSize = 24.sp))
+                                    }
+
+                                    Column(
+                                        Modifier.weight(5f),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(text = "Remaining", style = TextStyle(fontSize = 24.sp))
+                                    }
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Column(
+                                        Modifier.weight(5f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        NutMegTextField().CurrencyField(
+                                            data = budgetTextfieldData,
+                                            textStyle = TextStyle(fontSize = 24.sp),
+                                            imeAction = ImeAction.Done
+                                        )
+                                    }
+
+                                    Column(
+                                        Modifier.weight(5f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(text = doubleToCurrencyFormatter(remaining), style = TextStyle(fontSize = 26.sp))
+                                    }
+                                }
                             }
-                            Column(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .weight(2f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center) {
-                                Text(text = "Price")
-                            }
-                            Column(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .weight(2f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center) {
-                                Text(text = "Item Total")
-                            }
+
                         }
 
-                        LazyColumn() {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.2f))
+                        ) {
+                            Row(
+                                Modifier
+                                    .height(50.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .width(50.dp)
+                                ) {
 
-                            items(itemList){ item ->
-                                itemCell({itemList = itemList - 1})
+                                }
+                                Column(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .weight(2f),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(text = "Name")
+                                }
+                                Column(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .weight(2f),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(text = "Qty")
+                                }
+                                Column(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .weight(2f),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(text = "Price")
+                                }
+                                Column(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .weight(2f),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(text = "Total")
+                                }
                             }
-                        }
 
+                            LazyColumn {
+
+                                items(itemList.size) { index ->
+                                    ItemCell(
+                                        itemList[index]
+                                    ) {
+                                        itemList =
+                                            itemList.toMutableList().apply { removeAt(index) }
+                                    }
+                                }
+                            }
+
+                        }
                     }
                 }
 
@@ -164,10 +321,9 @@ fun mainScreen() {
                         .fillMaxWidth()
                         .height(80.dp), horizontalArrangement = Arrangement.Center
                 ) {
+                    if (!showPopUp)
                     NutMegStyledButton(title = "Add") {
-
-                        itemList = itemList + 1
-
+                        showPopUp = true
                     }
                 }
             },
@@ -176,7 +332,7 @@ fun mainScreen() {
     }
 
 @Composable
-fun itemCell(deleteAction: (itemNumber: Int) -> Unit = {}){
+fun ItemCell(item: Item, deleteAction: (itemNumber: Int) -> Unit = {}){
     Row(
         Modifier
             .height(50.dp)
@@ -199,7 +355,7 @@ fun itemCell(deleteAction: (itemNumber: Int) -> Unit = {}){
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = "Bread")
+            Text(text = item.name)
         }
         Column(
             Modifier
@@ -207,7 +363,7 @@ fun itemCell(deleteAction: (itemNumber: Int) -> Unit = {}){
                 .weight(2f),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-            Text(text = "1")
+            Text(text = item.qty.toString())
         }
         Column(
             Modifier
@@ -215,7 +371,7 @@ fun itemCell(deleteAction: (itemNumber: Int) -> Unit = {}){
                 .weight(2f),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-            Text(text = "$0.00")
+            Text(text = doubleToCurrencyFormatter(item.price))
         }
         Column(
             Modifier
@@ -223,7 +379,7 @@ fun itemCell(deleteAction: (itemNumber: Int) -> Unit = {}){
                 .weight(2f),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-            Text(text = "$0.00")
+            Text(text = doubleToCurrencyFormatter(item.itemTotal))
         }
     }
 }
@@ -238,9 +394,9 @@ fun itemCell(deleteAction: (itemNumber: Int) -> Unit = {}){
         onClick: () -> Unit
     ) {
 
-        val buttonColor: Color = if (full) color else Color.Transparent
-        val textColor: Color = if (full) Color.White else color
-        val borderColor: Color = color
+        val buttonColor: Color = if (full) color.copy(alpha = 0.5f) else Color.Transparent
+        val textColor: Color = if (full) Color.White else color.copy(alpha = 0.5f)
+        val borderColor: Color = color.copy(alpha = 0.5f)
         val textSize = 14
 
         Button(
@@ -266,3 +422,18 @@ fun itemCell(deleteAction: (itemNumber: Int) -> Unit = {}){
 
         }
     }
+
+fun stringToCurrencyFormatter(text: String = "00.00") : String{
+    val cleanedText = text.replace(Regex("[^0-9.]+"), "")
+
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
+    val transformedText = currencyFormat.format(cleanedText.toDouble())
+    return transformedText.toString()
+}
+
+fun doubleToCurrencyFormatter(text: Double = 0.00) : String{
+
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
+    val transformedText = currencyFormat.format(text)
+    return transformedText.toString()
+}
