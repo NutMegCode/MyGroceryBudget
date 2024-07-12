@@ -65,13 +65,23 @@ fun mainScreen() {
     val priceTextfieldData = remember { TextfieldData() }
 
 
+
     val total = itemList.sumOf { it.itemTotal }
 
     val remaining = budgetTextfieldData.dpFormattedText.toDouble() - total
 
-    Log.d("RandomString", "remaining is $remaining")
+    val percentage = (remaining / total) * 100
 
-        Scaffold(
+    val remainingColor = if (percentage < 10) {
+        colorResource(id = R.color.issue)
+    } else if (percentage < 30) {
+        colorResource(id = R.color.warning)
+    }else{
+        Color.Black
+    }
+
+
+    Scaffold(
             topBar = {
                 Row(
                     modifier = Modifier
@@ -82,7 +92,7 @@ fun mainScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
-                    Text(text = "My Shop Budget")
+                    Text(text = "My Shop Budget", style = TextStyle(fontSize = 18.sp))
                 }
             },
             content = { paddingValues ->
@@ -232,7 +242,7 @@ fun mainScreen() {
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         verticalArrangement = Arrangement.Center
                                     ) {
-                                        Text(text = doubleToCurrencyFormatter(remaining), style = TextStyle(fontSize = 26.sp))
+                                        Text(text = doubleToCurrencyFormatter(remaining), style = TextStyle(fontSize = 26.sp), color = remainingColor)
                                     }
                                 }
                             }
