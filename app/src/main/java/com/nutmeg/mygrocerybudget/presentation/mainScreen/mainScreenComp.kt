@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,16 +17,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,12 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nutmeg.mygrocerybudget.R
 import com.nutmeg.mygrocerybudget.utils.NutMegTextField
 import com.nutmeg.mygrocerybudget.utils.TextfieldData
 import java.text.NumberFormat
@@ -80,7 +77,7 @@ fun mainScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(80.dp)
-                        .background(Color.Cyan.copy(alpha = 0.2f)),
+                        .background(colorResource(id = R.color.highlight)),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -103,7 +100,7 @@ fun mainScreen() {
                                 .fillMaxWidth()
                                 .wrapContentHeight()
                                 .padding(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.2f))
+                            colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.highlight))
                         ) {
                             Column(
                                 Modifier
@@ -159,13 +156,17 @@ fun mainScreen() {
                                     Column(Modifier.weight(5f),horizontalAlignment = Alignment.CenterHorizontally) {
                                         NutMegStyledButton(
                                             title = "Save",
+                                            width = 200,
                                             full = false
                                         ) {
+
+                                            val qty = quantityTextfieldData.text.ifBlank { "1" }
+
                                             val newItem = Item(
                                                 name = nameTextfieldData.text,
-                                                qty = quantityTextfieldData.text.toInt(),
+                                                qty = qty.toInt(),
                                                 price = priceTextfieldData.dpFormattedText.toDouble(),
-                                                itemTotal = priceTextfieldData.dpFormattedText.toDouble() * quantityTextfieldData.text.toDouble()
+                                                itemTotal = priceTextfieldData.dpFormattedText.toDouble() * qty.toDouble()
                                             )
 
                                             itemList =
@@ -194,7 +195,7 @@ fun mainScreen() {
                                 .fillMaxWidth()
                                 .wrapContentHeight()
                                 .padding(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.2f))
+                            colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.main))
                         ) {
                             Column(Modifier.padding(12.dp)) {
                                 Row(Modifier.padding(bottom = 12.dp)) {
@@ -243,7 +244,7 @@ fun mainScreen() {
                                 .fillMaxWidth()
                                 .wrapContentHeight()
                                 .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.2f))
+                            colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.main))
                         ) {
                             Row(
                                 Modifier
@@ -388,21 +389,27 @@ fun ItemCell(item: Item, deleteAction: (itemNumber: Int) -> Unit = {}){
     fun NutMegStyledButton(
         title: String,
         modifier: Modifier = Modifier,
-        color: Color = Color.Blue,
+        width: Int = 0,
+        color: Color = colorResource(id = R.color.secondary),
         enabled: Boolean = true,
         full: Boolean = true,
         onClick: () -> Unit
     ) {
 
-        val buttonColor: Color = if (full) color.copy(alpha = 0.5f) else Color.Transparent
-        val textColor: Color = if (full) Color.White else color.copy(alpha = 0.5f)
-        val borderColor: Color = color.copy(alpha = 0.5f)
+        val newMod = if (width != 0){
+            modifier.width(width.dp)
+        }else{
+            modifier.wrapContentWidth()
+        }
+
+        val buttonColor: Color = if (full) color else Color.Transparent
+        val textColor: Color = if (full) Color.White else color
+        val borderColor: Color = color
         val textSize = 14
 
         Button(
-            modifier = modifier
-                .height(48.dp)
-                .wrapContentWidth(),
+            modifier = newMod
+                .height(48.dp),
             shape = RoundedCornerShape(10.dp),
             border = BorderStroke(1.dp, if (enabled) borderColor else borderColor.copy(0.5f)),
             contentPadding = PaddingValues(10.dp),
